@@ -306,16 +306,11 @@ def res_img_gauss(image,levels):
         cI = cv2.pyrUp(cI)     
     return cI
 def colorvideoMagnification(video,amp,atn):
-    #for i in range(0,video.shape[0]):
+    
     video[:,:,:,0] *= amp
     video[:,:,:,1] *= atn
     video[:,:,:,2] *= atn
-    #video = video*amp
-    #video[:,:,:,1] *= atn
-    #video[:,:,:,2] *= atn
-    #image[:,:,0] *=atn#lab
-    #image[:,:,1] *= amp#lab
-    #image[:,:,2] *= amp#lab
+
     return video
 
 
@@ -343,9 +338,7 @@ def colorMagnification(image,amp,atn):
     image = image*amp
     image[:,:,1] *= atn
     image[:,:,2] *= atn
-    #image[:,:,0] *=atn#lab
-    #image[:,:,1] *= amp#lab
-    #image[:,:,2] *= amp#lab
+    
     return image
 
 
@@ -612,10 +605,7 @@ def filt_temp_id_wv20(data,low,high, fps):
                                         ext_sig[i][k][j][m].append([data[j][0][i][k][m][n],data[j][1][i][k][m][n],data[j][2][i][k][m][n]])
 
 
-    #array_data = []
-    #for i in range(len(data[0][0])):
-    #    array_data.append(ext_sig[i])
-    #print()
+    
     filtrado = ext_sig
     freqs = fft.fftfreq(len(data),d=1/(fps))
     fb = (np.abs(freqs-low)).argmin()
@@ -641,10 +631,9 @@ def filt_temp_id_wv20(data,low,high, fps):
                 fft_vid[fa:-fa] = 0
                 fft_vid[-fb:] = 0
                 filtrado[i][k] = np.abs(fft.ifft(fft_vid,axis=0))
-    #filtro = filtrado.tolist()
+    
     dat_filt = data
-    #print(len(filtrado),len(filtrado[1]),len(filtrado[1][0]),len(filtrado[1][0][0]),len(filtrado[1][0][0][0]), len(filtrado[1][0][0][0][0]))
-    #print(len(data),len(data[0]),len(data[0][0]),len(data[0][0][1]),len(data[0][0][1][1][0]))
+    
     for i in range(len(data)):
 
         for j in range(len(data[0][0])):
@@ -1158,13 +1147,13 @@ def bpm_1(canal,fps,fb,fh):
     
 
 
-# Converte a frequência para batimentos por minuto (BPM)
+
     bpm = round(peak_freq * 60)
 
-    # Encontrando os picos na faixa de frequência filtrada
-    peaks, _ = signal.find_peaks(np.abs(fft_result_filtrado))  # ajuste o threshold conforme necessário
+    
+    peaks, _ = signal.find_peaks(np.abs(fft_result_filtrado))  
 
-    # Obtendo as frequências dos picos encontrados
+    
     peak_freqs = freqs[peaks]
     """
     # Plotando o espectro de frequência filtrado
@@ -1204,11 +1193,11 @@ def bpm_1(canal,fps,fb,fh):
     return freqs,fft_result_filtrado,bpm
 
 def bpm_2(canal,fps,fb,fa):
-    # Especificações da transformada de wavelets
-    wavelet_name = 'db4'  # Você pode escolher uma wavelet adequada para o seu caso
-    level = 5  # Número de níveis de decomposição
+    
+    wavelet_name = 'db4'  
+    level = 5  
 
-    # Aplicando a transformada de wavelets em cada canal
+    
     coeffs = []
     for i in range(3):
         cA, cD = pywt.dwt(canal[i], wavelet_name)
@@ -1221,12 +1210,12 @@ def bpm_2(canal,fps,fb,fa):
         filtered_data = filtfilt(b, a, data)
         return filtered_data
 
-# Calculando as frequências correspondentes
-    sampling_rate = fps  # Substitua pela taxa de amostragem real do seu sinal
+
+    sampling_rate = fps  
     total_samples = len(canal[0])
     frequencies = np.fft.fftfreq(total_samples, d=1/sampling_rate)
 
-    # Convertendo os índices de frequência para Hertz
+    
     frequencies_hertz = frequencies * sampling_rate
     indices_frequencias_desejadas = np.where((frequencies_hertz >= 0) & (frequencies_hertz <= 50))[0]
     print(frequencies_hertz)
@@ -1313,32 +1302,32 @@ def sat_oxi2(canais):
 
 def filtro_kerman(sinais):
 
-    # Variáveis do sistema
-    dt = 1  # Intervalo de tempo entre medições
-    A = np.array([[1, dt], [0, 1]])  # Matriz de transição de estado
-    H = np.array([[1, 0]])  # Matriz de observação
+    
+    dt = 1  
+    A = np.array([[1, dt], [0, 1]])  
+    H = np.array([[1, 0]])  
 
-    # Matrizes de covariância do processo e da medição
-    Q = np.array([[0.1, 0], [0, 0.1]])  # Covariância do processo
-    R = np.array([[1]])  # Covariância da medição
+    
+    Q = np.array([[0.1, 0], [0, 0.1]]) 
+    R = np.array([[1]])  
 
-    # Estado inicial e incerteza inicial
-    x = np.array([[0], [0]])  # Estado [posição, velocidade]
-    P = np.array([[1, 0], [0, 1]])  # Matriz de covariância inicial
+    
+    x = np.array([[0], [0]])  
+    P = np.array([[1, 0], [0, 1]])  
 
-    # Lista para armazenar os sinais filtrados
+    
     
     filtered_signals = []
     
-    # Loop de predição e atualização
+    
     for z in sinais:
         
 
-        # Etapa de previsão
+        
         x_pred = np.dot(A, x)
         P_pred = np.dot(np.dot(A, P), A.T) + Q
         
-        # Etapa de atualização
+        
         K = np.dot(np.dot(P_pred, H.T), np.linalg.inv(np.dot(np.dot(H, P_pred), H.T) + R))
         x = x_pred + np.dot(K, z - np.dot(H, x_pred))
         P = np.dot((np.identity(2) - np.dot(K, H)), P_pred)
@@ -1346,7 +1335,7 @@ def filtro_kerman(sinais):
         filtered_signals.append(x[0, 0])
     
 
-    # Resultados finais
+    
     return filtered_signals
 
 def criar_imagem_com_texto(imagem,saturacao,bpm,filename):
@@ -1355,18 +1344,18 @@ def criar_imagem_com_texto(imagem,saturacao,bpm,filename):
     imagem = Image.open("C:/Users/Rodrigo/Documents/rocketseat/TCC/imagem_sem_texto_"+ filename+".png")
     desenho = ImageDraw.Draw(imagem)
 
-    # Adicionar o texto no canto superior direito
-    fonte = ImageFont.load_default()  # Pode ser necessário ajustar a fonte conforme necessário
+    
+    fonte = ImageFont.load_default()  
     texto = f"Frequência Cardíaca: {bpm} bpm\nSaturação de oxigênio: {saturacao}%"
     largura_texto, altura_texto = desenho.textsize(texto, font=fonte)
     posicao = (imagem.width - largura_texto - 10, 10)
-    # Definir as coordenadas do retângulo preto
+    
     coordenadas_retangulo = [posicao[0] - 5, posicao[1] - 5, imagem.width, posicao[1] + altura_texto + 5]
 
-    # Adicionar o retângulo preto
+    
     desenho.rectangle(coordenadas_retangulo, fill="black")
     desenho.text(posicao, texto, fill="white", font=fonte)
-    # Salvar a imagem resultante
+    
     imagem.save("imagem_com_texto_"+filename+".png") 
 
 def save_image(imagem,filename):
@@ -1384,28 +1373,28 @@ def corrigir_orientacao(imagem):
                 elif valor == 8:
                     imagem = imagem.rotate(90, expand=True)
     except (AttributeError, KeyError, IndexError):
-        # A imagem não tem informações de orientação Exif
+        
         pass
     
     return imagem
 
 def redimensionar_para_mesma_altura(imagem1, imagem2):
-    # Abre as imagens
+    
     img1 = Image.open(imagem1)
     img2 = Image.open(imagem2)
 
-    # Corrige a orientação para ambas as imagens
+    
     img1 = corrigir_orientacao(img1)
     img2 = corrigir_orientacao(img2)
 
-    # Obtém as alturas das imagens
+    
     altura_img1 = img1.height
     altura_img2 = img2.height
 
-    # Escolhe a menor altura
+    
     altura_minima = min(altura_img1, altura_img2)
 
-    # Redimensiona ambas as imagens para ter a mesma altura
+    
     img1 = img1.resize((int((altura_minima / altura_img1) * img1.width), altura_minima))
     img2 = img2.resize((int((altura_minima / altura_img2) * img2.width), altura_minima))
 
@@ -1413,21 +1402,21 @@ def redimensionar_para_mesma_altura(imagem1, imagem2):
 
 
 def paste_image(file1,file2):
-    # Redimensiona as imagens
+    
     img1, img2 = redimensionar_para_mesma_altura(file1, file2)
 
-    # Obtém as larguras das imagens redimensionadas
+    
     largura_img1, largura_img2 = img1.width, img2.width
 
-    # Cria uma nova imagem com a largura total
+    
     largura_total = largura_img1 + largura_img2
     img_final = Image.new('RGB', (largura_total, img1.height))
     
-    # Coloca as imagens lado a lado
+    
     img_final.paste(img1, (0, 0))
     img_final.paste(img2, (largura_img1, 0))
 
-    # Salva a imagem resultante
+    
     img_final.save("imagem_resultante.png")
 
 def salvar_dados_bpm(bpm1,bpm2,bpm3,bpm4,bpm5,real,name):
